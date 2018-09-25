@@ -1,0 +1,185 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>Responsive Media RSS HTML Newsticker with videos</title>
+        <style>
+            h1
+            {
+                color: #fff;
+                font: bold 3.0vw sans-serif;
+                margin: 10% 5% 5% 5%;
+                text-shadow: 2px 2px 4px #000;
+            }
+            article
+            {
+                clear: both;
+                display:none;
+                animation: fade 1s linear forwards;
+            }
+            video, img
+            {
+                float:left;
+                width:40%;
+                margin: 0 0 0 5%;
+                border:1px solid #004;
+                box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+            }
+            div
+            {
+                font: normal 2.2vw sans-serif;
+                line-height:3vw;
+                color:#fff;
+                float:left;
+                width:45%;
+                margin: 0 0 0 2%;
+                text-shadow: 2px 2px 4px #000;
+            }
+            @keyframes fade
+            {
+                from
+                {
+                    opacity: 0;
+                } 
+                to
+                {
+                    opacity: 1;
+                }
+            }
+            
+            @media screen and (orientation:portrait)
+            {
+                h1
+                {
+                    font-size: 6vw;
+                    line-height:8vw;
+                }
+                video, img
+                {
+                    clear: both;
+                    width:90%;
+                    margin: 5% 0 0 5%;
+                }
+                div
+                {
+                    clear: both;
+                    font-size:5vw;
+                    line-height:6.5vw;
+                    width:90%;
+                    margin: 10% 0 0 5%;
+                }
+            }         
+        </style>
+        <script>
+            const _background_image = 'http://www.tagesschau.de/infoscreen/img/background-16-9-HD.png';
+            const _url              = "https://www.tagesschau.de/templates/pages/export/iscreen.xml";
+            const _slide_duration   = 15; // in seconds
+            
+            var slide_index       = 0;
+            function showSlides()
+            {
+                var i;
+                var MySlides = document.getElementsByClassName("slides");
+                var video;
+                for (i = 0; i < MySlides.length; i++)
+                {
+                    MySlides[i].style.display = "none"; 
+                    video = MySlides[i].getElementsByTagName("video");
+                    video[0].pause();
+                }
+                slide_index++;
+                if (slide_index > MySlides.length)
+                {
+                    slide_index = 1
+                } 
+                
+                MySlides[slide_index-1].style.display = "block"; 
+                video                                 = MySlides[slide_index-1].getElementsByTagName("video");
+                video[0].play();
+                setTimeout(showSlides, _slide_duration * 1000);
+            }        
+        
+            function displayTicker(ticker_html, num_headlines)
+            {
+                document.getElementById('feed').innerHTML = ticker_html;
+                showSlides();
+            }
+
+            function readEnclosure(enclosure)
+            {
+                var html = "";
+                if (enclosure.type.includes("video"))
+                {
+                    html = '<video muted loop>' +
+                                '<source src="'+ enclosure.url+'" type="'+enclosure.type+'" >'+
+                            '</video>';
+                }            
+                else if (enclosure.type.includes("image"))
+                {
+                    html = '<img src="'+ enclosure.url+'" />';
+                }
+                return html;
+            }    
+            
+            function createTickerOutput(feed_obj)
+            {
+                var ticker_html = "";
+                for (var i = 0; i < feed_obj.query.count; i++)
+                {
+                    ticker_html += '<article class="slides">'+
+                                        '<h1>'+feed_obj.query.results.item[i].title+'</h1>' +
+                                            readEnclosure(feed_obj.query.results.item[i].enclosure) +
+                                        '<div>'+feed_obj.query.results.item[i].description+'</div>' +
+                                        '<br style="clear:both" />'+
+                                    '</article>';
+                }
+                return ticker_html;
+            }
+        
+            function handleTicker(response)
+            {
+                var feed_obj    = JSON.parse(response);
+                var ticker_html = createTickerOutput(feed_obj);
+                displayTicker(ticker_html, feed_obj.query.count);			
+            }
+            
+            function getRSS(url)
+            {
+                var request_url = 'https://query.yahooapis.com/v1/public/yql?q=select title, description, enclosure from rss where url="'+url+'"&format=json';
+                var MyRequest = new XMLHttpRequest(); // a new request
+                MyRequest.open("GET", request_url, true);
+                MyRequest.onload = function (e)
+                {
+                    if (MyRequest.readyState === 4)
+                    {
+                        if (MyRequest.status === 200)
+                        {
+                            handleTicker(MyRequest.responseText);
+                        }
+                        else
+                        {
+                            console.error(MyRequest.statusText);
+                        }
+                    }
+                };
+                MyRequest.onerror = function (e)
+                {
+                    console.error(MyRequest.statusText);
+                };
+                MyRequest.send(null);
+                return;
+            }
+
+            function start()
+            {
+                document.body.style.backgroundImage = "url("+_background_image+")";
+                getRSS(_url);
+            }		
+
+	</script>	
+	</head>
+    <body onload="start()">
+        <section id="feed">
+        </section>
+    </body>
+</html>
