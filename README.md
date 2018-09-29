@@ -1,5 +1,6 @@
-# responsive-html5-video-mrss
-A tutorial how to create a responsible html5 site based with content from a media rss with video enclosures
+# Responsive Digitale Signage Tutorial
+
+A tutorial how to create a responsive digital signage html5 site based with content from a media rss with video enclosures
 
 Live example
 https://smil-control.de/beispiele/smil-academy/media_rss/responsive-sample.html
