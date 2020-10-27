@@ -135,15 +135,15 @@
 			function readEnclosure(enclosure)
 			{
 				var html = "";
-				if (enclosure.type.includes("video"))
+				if (enclosure["@attributes"].type.includes("video"))
 				{
 					html = '<video muted loop>' +
-								'<source src="'+ enclosure.url+'" type="'+enclosure.type+'" >'+
+								'<source src="'+ enclosure["@attributes"].url+'" type="'+enclosure["@attributes"].type+'" >'+
 							'</video>';
 				}            
-				else if (enclosure.type.includes("image"))
+				else if (enclosure["@attributes"].type.includes("image"))
 				{
-					html = '<img src="'+ enclosure.url+'" />';
+					html = '<img src="'+ enclosure["@attributes"].url+'" />';
 				}
 				return html;
 			}    
@@ -171,7 +171,7 @@
 
 			function getRSS(url)
 			{
-				var request_url = 'https://query.yahooapis.com/v1/public/yql?q=select title, description, enclosure from rss where url="'+url+'"&format=json';
+				var request_url = 'https://smil-control.com/examples/fetch-rss.php?feed_url='+url;
 				var MyRequest = new XMLHttpRequest(); // a new request
 				MyRequest.open("GET", request_url, true);
 				MyRequest.onload = function (e)
